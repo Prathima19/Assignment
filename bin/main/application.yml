@@ -1,0 +1,30 @@
+spring:
+  # turn off spring banner on startup
+  main:
+        banner-mode: "off"
+  jackson:
+    mapper:
+      # include the attributes with no view defined as default
+      default-view-inclusion: true
+      
+  datasource:
+    platform: hsql
+    initialize: false
+    driver-class-name: org.hsqldb.jdbcDriver
+    url: jdbc:hsqldb:mem:test;sql.syntax_pgs=true
+    username: sa
+    password: "" 
+     
+# Hibernate Configuration
+hibernate:
+  dialect: org.hibernate.dialect.HSQLDialect
+  hbm2ddl.auto: update
+  implicit_naming_strategy: jpa
+  format_sql: false
+  show_sql: false  
+
+server:
+  contextPath: /api/demo/v1
+  port: 8080
+    
+
