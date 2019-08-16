@@ -1,0 +1,126 @@
+// Gradle build file
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+        classpath 'io.github.swagger2markup:swagger2markup-spring-restdocs-ext:1.2.0'
+        classpath 'io.github.swagger2markup:swagger2markup-gradle-plugin:1.2.0'
+        classpath "org.ajoberstar:gradle-git:1.5.1"
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '1.5.3.RELEASE'
+    id 'java'    
+	id 'maven-publish'
+}
+
+repositories
+{
+    jcenter() 
+    mavenLocal()   
+    maven {
+	    url "https://nexus.dev.aws.singtel.com/repository/maven-public/"
+    }
+}
+
+if (version_suffix?.trim()) {
+  version = "${version_major}.${version_minor}.${version_patch}-${version_suffix}"
+} else {
+  version = "${version_major}.${version_minor}.${version_patch}"
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+project.ext {
+	hibernateVersion = '5.2.10.Final'
+    springVersion    = '4.3.8.RELEASE'
+}
+
+configurations.all
+{
+  	resolutionStrategy
+  	{
+		eachDependency { DependencyResolveDetails details ->	
+      		if ( details.requested.group == 'org.hibernate' 
+     		 && details.requested.name != 'hibernate-validator' )
+  		    {
+    			details.useVersion "${hibernateVersion}"
+      		}      		
+      		else if ( details.requested.group == 'org.springframework') {
+        		details.useVersion "${springVersion}"
+      		}      		
+    	}
+
+	    // cache dynamic versions for 10 minutes
+	    cacheDynamicVersionsFor 10*60, 'seconds'
+	    
+	    // don't cache changing modules at all
+	    cacheChangingModulesFor 0, 'seconds'
+	}
+}
+
+
+dependencies
+{
+	// spring boot
+	compile "org.springframework.boot:spring-boot-starter-web"
+	compile "org.springframework.boot:spring-boot-starter-security"
+	compile "org.springframework.boot:spring-boot-starter-data-jpa"
+	compile "org.springframework.data:spring-data-envers:2.0.0.RELEASE" 
+	compile "org.apache.commons:commons-lang3:3.0"	
+	compile group: 'org.springframework.ws', name: 'spring-ws-security', version: '3.0.0.RELEASE'
+	compile group: 'org.springframework.ws', name: 'spring-ws-core', version: '2.4.0.RELEASE'	
+	
+	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ssm
+	compile group: 'com.amazonaws', name: 'aws-java-sdk-ssm', version: '1.11.170'
+
+	compile group: 'org.apache.axis', name: 'axis', version: '1.4'
+	compile group: 'org.apache.axis', name: 'axis-saaj', version: '1.4'
+	compile group: 'javax.xml', name: 'jaxrpc-api', version: '1.1'
+	compile group: 'commons-discovery', name: 'commons-discovery', version: '0.5'
+	compile group: 'wsdl4j', name: 'wsdl4j', version: '1.6.2'
+
+	compile "org.springframework:spring-aspects:4.3.8.RELEASE"	
+
+	// swagger
+	compile 'io.swagger:swagger-annotations:1.5.6'
+	// credstash
+	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.2.3'
+	// json
+	compile 'org.json:json:20170516'
+	compile 'com.amazonaws:aws-java-sdk-logs:1.11.160'
+	compile 'org.quartz-scheduler:quartz:2.2.1'
+    compile 'org.quartz-scheduler:quartz-jobs:2.2.1'
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+	runtime 'org.postgresql:postgresql:42.1.1.jre7'
+	compile 'org.apache.xmlrpc:xmlrpc-client:3.1.3'
+	compile 'org.apache.xmlrpc:xmlrpc-common:3.1.3'
+
+	testCompile "io.springfox:springfox-swagger2:2.7.0" 
+	testCompile "io.springfox:springfox-bean-validators:2.7.0"   
+    testCompile 'org.springframework.boot:spring-boot-starter-test'  
+    testCompile 'org.springframework.restdocs:spring-restdocs-mockmvc'     
+	testCompile 'org.dbunit:dbunit:2.5.3'
+	testCompile 'com.github.springtestdbunit:spring-test-dbunit:1.3.0'
+    testCompile 'org.springframework.security:spring-security-test'
+    testCompile 'org.springframework.ws:spring-ws-test:2.4.0.RELEASE'
+    testRuntime 'org.hsqldb:hsqldb:2.4.0'
+
+    // added primarily for nullability annotations
+    // This helps IDEs to warn against NullPointerExceptions
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+
+springBoot {
+    executable = true
+}
+
+
+
+
